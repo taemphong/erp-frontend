@@ -141,6 +141,29 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="stockDialog" max-width="500px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">เพิ่มสต๊อกสินค้า</span>
+        </v-card-title>
+
+        <v-card-text>
+          <v-form ref="stockForm">
+            <v-text-field v-model="stockQuantity" label="จำนวนที่เพิ่ม" type="number" min="1" required />
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="red lighten-2" text @click="closeStockDialog">
+            ยกเลิก
+          </v-btn>
+          <v-btn color="green" text @click="confirmAddStock">
+            เพิ่มสต๊อก
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -150,9 +173,10 @@ import Swal from 'sweetalert2'
 export default {
   data () {
     return {
+      stockDialog: false,
       editDialog: false,
       search: '',
-      products: [], // เก็บข้อมูลสินค้าที่ดึงจาก API
+      products: [],
       editedProduct: {
         ProductID: null,
         ProductName: '',
@@ -160,7 +184,8 @@ export default {
         QuantityInStock: null,
         ReorderPoint: null,
         Price: null
-      }
+      },
+      stockQuantity: null
     }
   },
   computed: {
@@ -226,7 +251,47 @@ export default {
       this.editDialog = false
     },
     updateStock (productID) {
-      this.$router.push('/')
+      console.log('stock', productID)
+      this.selectedProductId = productID
+      this.stockDialog = true
+    },
+
+    async confirmAddStock () {
+      if (!this.selectedProductId) {
+        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่พบสินค้า', icon: 'error' })
+        return
+      }
+
+      if (this.stockQuantity < 1) {
+        Swal.fire({ title: 'จำนวนต้องมากกว่า 0', icon: 'error' })
+        return
+      }
+
+      try {
+        const response = await this.$axios.$post('http://localhost:8100/api/product/addstock', {
+          ProductID: this.selectedProductId,
+          QuantityInStock: this.stockQuantity
+        })
+
+        if (response.status === 'success') {
+          Swal.fire({ title: 'เพิ่มสต๊อกสำเร็จ', icon: 'success' })
+          this.fetchProducts()
+        } else {
+          Swal.fire({ title: 'เกิดข้อผิดพลาด', text: response.message, icon: 'error' })
+        }
+      } catch (error) {
+        console.error('Error adding stock:', error)
+        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถเพิ่มสต๊อกได้', icon: 'error' })
+      }
+
+      this.closeStockDialog()
+      this.selectedProductId = null
+    },
+
+    closeStockDialog () {
+      this.stockDialog = false
+      this.selectedProductId = null
+      this.stockQuantity = null
     },
     async deleteProduct (productID) {
       try {
@@ -235,8 +300,8 @@ export default {
           text: 'ยืนยันการลบสินค้า',
           icon: 'warning',
           showCancelButton: true,
-          confirmButtonColor: '#32CD32',
-          cancelButtonColor: '#d33',
+          confirmButtonColor: '#5cd65c',
+          cancelButtonColor: '#ff4d4d',
           confirmButtonText: 'ยืนยัน',
           cancelButtonText: 'ยกเลิก'
         })
