@@ -190,15 +190,14 @@ export default {
   },
   computed: {
     filteredProducts () {
-      // กรองข้อมูลสินค้าจากการค้นหา
       return this.products.filter((product) => {
         const productName = product?.ProductName || ''
         const categoryName = product?.CategoryName || ''
-        const search = this.search || ''
+        const statusText = this.getStatusText(product) || ''
+        const search = this.search?.toLowerCase() || ''
 
-        return (
-          productName.toLowerCase().includes(search.toLowerCase()) || categoryName.toLowerCase().includes(search.toLowerCase())
-        )
+        return [productName, categoryName, statusText]
+          .some(field => field.toLowerCase().includes(search))
       })
     }
   },

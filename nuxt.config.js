@@ -1,6 +1,8 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
+  debug: true,
+
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: '%s - erp-frontend',
@@ -27,7 +29,9 @@ export default {
   plugins: [
     { src: '~/plugins/vee-validate.js' },
     { src: '~/plugins/sweetalert2.js' },
-    { src: '~/plugins/loading.js' }
+    { src: '~/plugins/loading.js' },
+    { src: '~/plugins/toast.js', mode: 'client' },
+    { src: '~/plugins/socket.js' }
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

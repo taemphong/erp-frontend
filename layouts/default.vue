@@ -68,6 +68,7 @@ export default {
   name: 'DefaultLayout',
   data () {
     return {
+      lowstock: [],
       clipped: true,
       drawer: true,
       fixed: true,
@@ -79,9 +80,36 @@ export default {
         { icon: 'mdi-view-dashboard', title: 'Dashboard', to: '/' },
         { icon: 'mdi-basket-fill', title: 'เพิ่มสินค้า', to: '/addproduct' },
         { icon: 'mdi-package-variant', title: 'จัดการสินค้าคงคลัง', to: '/productmanagement' },
-        { icon: 'mdi-package-variant', title: 'จัดการสต๊อกสินค้า', to: '/stockproduct' }
+        { icon: 'mdi-package-variant', title: 'จัดการสต๊อกสินค้า', to: '/stockproduct' },
+        { icon: 'mdi-checkbox-multiple-marked-circle', title: 'ตรวจเช็คสต๊อกสินค้า', to: '/checkstock' },
+        { icon: 'mdi-account-multiple', title: 'พนักงาน', to: '/employees' },
+        { icon: 'mdi-account-multiple-plus', title: 'พนักงานใหม่', to: '/newemployee' }
       ]
     }
+  },
+  mounted () {
+    this.$socket.on('low-stock-alert', (data) => {
+      console.log('ได้รับแจ้งเตือนสินค้าใกล้หมด:', data)
+      this.lowStockItems = data
+
+      this.$toast.dismiss('low-stock-alert')
+
+      this.$toast.warning('ตรวจพบสินค้าใกล้หมด', {
+        id: 'low-stock-alert',
+        position: 'top-right',
+        timeout: 5000,
+        closeOnClick: true,
+        pauseOnFocusLoss: true,
+        pauseOnHover: true,
+        draggable: true,
+        draggablePercent: 0.6,
+        showCloseButtonOnHover: false,
+        hideProgressBar: true,
+        closeButton: 'button',
+        icon: true,
+        rtl: false
+      })
+    })
   }
 }
 </script>
